@@ -1,0 +1,20 @@
+# Cache dan Compiled Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (jika nanti ada)
+.env
+
+# File Sistem Windows
+Thumbs.db
+Desktop.ini
+
+# Output dari Ultralytics (YOLO biasanya membuat folder 'runs' otomatis)
+runs/
+yolov8n.pt
+
+# (Opsional) Abaikan gambar hasil tes/output agar tidak memenuhi GitHub
+*.jpg
+*.png
+*.bmp
