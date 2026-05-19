@@ -24,13 +24,14 @@ class MiniPhotoshopPro(QMainWindow):
         self.cv_image_original = None
         self.cv_image_current = None
 
-        # Terapkan Tema UI Modern
+        # Terapkan Tema UI Modern (DARK MODE - ADOBE PHOTOSHOP STYLE)
         self.apply_stylesheet()
 
         # Load Model CNN YOLOv8n
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
         self.statusBar.showMessage("Memuat Model AI YOLOv8...")
+        self.statusBar.setStyleSheet("background-color: #007acc; color: white; font-weight: bold;")
         
         try:
             self.yolo_model = YOLO('yolov8n.pt') 
@@ -42,27 +43,82 @@ class MiniPhotoshopPro(QMainWindow):
         self.initUI()
 
     def apply_stylesheet(self):
-        # Desain UI agar terlihat modern dan rapi
+        # Desain UI Dark Mode Premium ala Aplikasi Editing Profesional
         self.setStyleSheet("""
-            QMainWindow { background-color: #f0f2f5; }
-            QGroupBox { font-weight: bold; border: 1px solid #cccccc; border-radius: 6px; margin-top: 10px; padding-top: 15px; }
-            QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top center; padding: 0 5px; color: #333333; }
-            QPushButton { background-color: #ffffff; border: 1px solid #b0b0b0; border-radius: 4px; padding: 6px; color: #333333; }
-            QPushButton:hover { background-color: #e0eaf5; border-color: #0078d7; }
-            QPushButton:pressed { background-color: #cce4f7; }
-            QLabel { color: #333333; }
+            QMainWindow { background-color: #1e1e1e; }
+            QWidget { color: #cccccc; font-family: 'Segoe UI', Arial, sans-serif; }
+            
+            QGroupBox { 
+                font-weight: bold; 
+                border: 1px solid #3a3a3a; 
+                border-radius: 8px; 
+                margin-top: 15px; 
+                padding-top: 20px; 
+                background-color: #252526;
+            }
+            QGroupBox::title { 
+                subcontrol-origin: margin; 
+                subcontrol-position: top left; 
+                padding: 0 10px; 
+                color: #00a8ff; 
+                left: 10px;
+                top: -5px;
+            }
+            
+            QPushButton { 
+                background-color: #333333; 
+                border: 1px solid #4a4a4a; 
+                border-radius: 5px; 
+                padding: 8px; 
+                color: #e0e0e0; 
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #007acc; border-color: #007acc; color: white; }
+            QPushButton:pressed { background-color: #005f9e; }
+            
+            QSlider::groove:horizontal { 
+                border: 1px solid #3a3a3a; 
+                height: 6px; 
+                background: #1e1e1e; 
+                border-radius: 3px; 
+            }
+            QSlider::handle:horizontal { 
+                background: #00a8ff; 
+                width: 14px; 
+                margin: -4px 0; 
+                border-radius: 7px; 
+            }
+            
+            QLabel { color: #e0e0e0; }
+            
+            QComboBox { 
+                background-color: #333333; 
+                border: 1px solid #4a4a4a; 
+                border-radius: 5px; 
+                padding: 6px; 
+                color: #e0e0e0; 
+            }
+            QComboBox::drop-down { border: none; }
+            QComboBox QAbstractItemView {
+                background-color: #333333;
+                color: #e0e0e0;
+                selection-background-color: #007acc;
+            }
+            
+            QScrollArea { border: none; background-color: transparent; }
+            QScrollArea > QWidget > QWidget { background-color: transparent; }
         """)
 
     def initUI(self):
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         main_layout = QHBoxLayout(main_widget)
+        main_layout.setContentsMargins(15, 15, 15, 15)
 
         # ================= KIRI: SCROLLABLE TOOLBAR =================
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setFixedWidth(340)
-        scroll_area.setStyleSheet("QScrollArea { border: none; background-color: transparent; }")
         
         toolbar_widget = QWidget()
         toolbar_layout = QVBoxLayout(toolbar_widget)
@@ -132,8 +188,7 @@ class MiniPhotoshopPro(QMainWindow):
         lay_ai = QVBoxLayout()
         btn_show_hist = QPushButton("Analisis Histogram (Before-After)"); btn_show_hist.clicked.connect(self.show_histogram)
         btn_yolo = QPushButton("Deteksi Objek (CNN YOLOv8)")
-        # Tombol AI diberi warna spesial agar menonjol
-        btn_yolo.setStyleSheet("background-color: #2e7d32; color: white; font-weight: bold; border: none; padding: 8px;")
+        btn_yolo.setStyleSheet("background-color: #2e7d32; color: white; font-weight: bold; border: none; padding: 10px; border-radius: 5px;")
         btn_yolo.clicked.connect(self.detect_objects)
         lay_ai.addWidget(btn_show_hist); lay_ai.addWidget(btn_yolo)
         grp_ai.setLayout(lay_ai); toolbar_layout.addWidget(grp_ai)
@@ -147,24 +202,26 @@ class MiniPhotoshopPro(QMainWindow):
         # Panel Before
         before_layout = QVBoxLayout()
         self.lbl_title_before = QLabel("<b>Before (Original)</b>", alignment=Qt.AlignCenter)
-        self.lbl_title_before.setFont(QFont("Arial", 11))
+        self.lbl_title_before.setFont(QFont("Segoe UI", 12))
         before_layout.addWidget(self.lbl_title_before)
-        self.lbl_before = QLabel("Silakan Load Image dari panel kiri")
+        
+        self.lbl_before = QLabel("Silakan Load Image")
         self.lbl_before.setAlignment(Qt.AlignCenter)
-        self.lbl_before.setStyleSheet("border: 2px dashed #999999; background-color: #ffffff;")
-        self.lbl_before.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored) # Mencegah Infinite Resize
+        self.lbl_before.setStyleSheet("border: 2px dashed #4a4a4a; background-color: #252526; border-radius: 10px;")
+        self.lbl_before.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored) 
         before_layout.addWidget(self.lbl_before, stretch=1)
         preview_layout.addLayout(before_layout)
 
         # Panel After
         after_layout = QVBoxLayout()
         self.lbl_title_after = QLabel("<b>After (Edited)</b>", alignment=Qt.AlignCenter)
-        self.lbl_title_after.setFont(QFont("Arial", 11))
+        self.lbl_title_after.setFont(QFont("Segoe UI", 12))
         after_layout.addWidget(self.lbl_title_after)
-        self.lbl_after = QLabel("Hasil pengolahan akan tampil di sini")
+        
+        self.lbl_after = QLabel("Area Pratinjau")
         self.lbl_after.setAlignment(Qt.AlignCenter)
-        self.lbl_after.setStyleSheet("border: 2px dashed #999999; background-color: #ffffff;")
-        self.lbl_after.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored) # Mencegah Infinite Resize
+        self.lbl_after.setStyleSheet("border: 2px dashed #4a4a4a; background-color: #252526; border-radius: 10px;")
+        self.lbl_after.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored) 
         after_layout.addWidget(self.lbl_after, stretch=1)
         preview_layout.addLayout(after_layout)
 
@@ -194,7 +251,6 @@ class MiniPhotoshopPro(QMainWindow):
         if fname:
             self.statusBar.showMessage("Menyimpan gambar...")
             if fname.lower().endswith(('.jpg', '.jpeg')):
-                # Kompresi JPEG dengan Kualitas 50
                 cv2.imwrite(fname, self.cv_image_current, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
             else:
                 cv2.imwrite(fname, self.cv_image_current)
@@ -333,7 +389,7 @@ class MiniPhotoshopPro(QMainWindow):
             return
 
         self.statusBar.showMessage("AI sedang memindai objek pada gambar...")
-        QApplication.processEvents() # Paksa UI untuk update pesan status
+        QApplication.processEvents() 
 
         kamus_indo = {0: 'Orang', 1: 'Sepeda', 2: 'Mobil', 3: 'Motor', 4: 'Pesawat', 5: 'Bus', 6: 'Kereta', 7: 'Truk', 8: 'Kapal', 14: 'Burung', 15: 'Kucing', 16: 'Anjing', 24: 'Ransel', 26: 'Tas Tangan', 27: 'Dasi', 39: 'Botol', 41: 'Cangkir', 56: 'Kursi', 62: 'TV', 63: 'Laptop', 64: 'Mouse', 66: 'Keyboard', 67: 'HP', 73: 'Buku'}
 
@@ -352,11 +408,11 @@ class MiniPhotoshopPro(QMainWindow):
             nama_objek = kamus_indo.get(class_id, nama_default.capitalize())
             label = f"{nama_objek} {conf*100:.0f}%"
             
-            warna_kotak = (0, 200, 0)
+            warna_kotak = (0, 200, 255) # Warna Kuning Keemasan
             cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), warna_kotak, 2)
             (w_teks, h_teks), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
             cv2.rectangle(annotated_frame, (x1, max(0, y1 - h_teks - 10)), (x1 + w_teks, max(0, y1)), warna_kotak, -1)
-            cv2.putText(annotated_frame, label, (x1, max(15, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            cv2.putText(annotated_frame, label, (x1, max(15, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2) # Teks Hitam
             
         self.cv_image_current = annotated_frame
         self.update_previews()
@@ -366,12 +422,12 @@ class MiniPhotoshopPro(QMainWindow):
     def update_previews(self):
         if self.cv_image_original is not None:
             h_ori, w_ori = self.cv_image_original.shape[:2]
-            self.lbl_title_before.setText(f"<b>Before (Original)</b><br><span style='color:#555;'>Dimensi: {w_ori} x {h_ori} px</span>")
+            self.lbl_title_before.setText(f"<b>Before (Original)</b><br><span style='color:#00a8ff; font-size: 14px;'>{w_ori} x {h_ori} px</span>")
             self.display_image(self.cv_image_original, self.lbl_before)
             
         if self.cv_image_current is not None:
             h_cur, w_cur = self.cv_image_current.shape[:2]
-            self.lbl_title_after.setText(f"<b>After (Edited)</b><br><span style='color:#555;'>Dimensi: {w_cur} x {h_cur} px</span>")
+            self.lbl_title_after.setText(f"<b>After (Edited)</b><br><span style='color:#00a8ff; font-size: 14px;'>{w_cur} x {h_cur} px</span>")
             self.display_image(self.cv_image_current, self.lbl_after)
 
     def display_image(self, cv_img, label_widget):
