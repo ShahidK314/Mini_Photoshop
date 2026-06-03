@@ -1,0 +1,88 @@
+---
+
+````markdown
+# 🎨 Mini Photoshop Pro - Web App Edition
+
+Aplikasi web interaktif untuk pengolahan citra digital dan kecerdasan buatan (AI). Proyek ini dikembangkan menggunakan **Python** dan **Streamlit** sebagai pemenuhan tugas Ujian Akhir Semester (UAS) mata kuliah **Pengolahan Citra Digital** di Politeknik Negeri Jakarta (PNJ)[cite: 3].
+
+Aplikasi ini tidak hanya menyajikan operasi manipulasi piksel matriks dasar, tetapi juga diintegrasikan dengan model _Convolutional Neural Network_ (CNN) YOLOv8 untuk melakukan deteksi objek secara waktu-nyata (_real-time_).
+
+---
+
+## 🌟 Fitur Utama
+
+Proyek ini mencakup 8 kelompok spesifikasi pengolahan citra utama ditambah 1 fitur cerdas berbasis AI:
+
+1. **📁 Manajemen File & Kompresi:** Unggah gambar dinamis dan ekspor (_download_) hasil olahan citra dengan simulasi pengaturan kompresi kualitas JPEG.
+2. **✨ Image Enhancement:** Modifikasi kecerahan (_brightness_), kontras, _Histogram Equalization_ untuk perataan cahaya, dan _Sharpening_ konvolusi.
+3. **📐 Transformasi Geometri:** Manipulasi matriks spasial seperti rotasi derajat bebas, _flip_ (vertikal/horizontal), translasi (pergeseran), dan pemotongan (_crop_).
+4. **🩹 Restorasi Citra (Reduksi Noise):** Pelemahan halus citra menggunakan _Gaussian Blur_ dan penghapusan _salt & pepper noise_ menggunakan _Median Filter_.
+5. **💠 Pemrosesan Biner & Tepi:** Konversi citra biner (Thresholding), 6 algoritma deteksi tepi (Canny, Sobel, Prewitt, Robert, Laplacian, LoG), dan operasi Morfologi.
+6. **🎨 Pemrosesan Warna:** Transformasi ruang warna RGB ke Grayscale dan ekstraksi pisah _channel_ (Channel Splitting).
+7. **🧩 Segmentasi Citra:** Klasterisasi warna menggunakan masking _Threshold-based_ (HSV) dan _Region-based_ (K-Means).
+8. **📊 Analisis Histogram:** Visualisasi matriks perbandingan distribusi frekuensi piksel _Before-After_ secara presisi menggunakan Matplotlib.
+9. **🤖 Pengenalan Objek Cerdas (YOLOv8):** Deteksi multi-objek menggunakan arsitektur _Convolutional Neural Network_ (CNN) dengan akurasi _Intersection over Union_ (IoU) tingkat tinggi, dilengkapi penerjemahan kelas COCO ke dalam Bahasa Indonesia.
+
+---
+
+## 💻 Tech Stack (Teknologi yang Digunakan)
+
+- **Frontend (GUI):** [Streamlit](https://streamlit.io/)
+- **Computer Vision (Backend):** OpenCV (`cv2`), Pillow (PIL)
+- **Scientific Computing & Matrix:** NumPy
+- **Data Visualization:** Matplotlib
+- **Machine Learning / CNN:** Ultralytics (YOLOv8), PyTorch
+
+---
+
+## 🚀 Cara Instalasi dan Menjalankan Secara Lokal
+
+Ikuti langkah-langkah berikut untuk menjalankan aplikasi ini di komputer Anda:
+
+**1. Clone Repositori**
+
+```bash
+git clone [https://github.com/USERNAME_GITHUB_ANDA/mini-photoshop-pcd.git](https://github.com/USERNAME_GITHUB_ANDA/mini-photoshop-pcd.git)
+cd mini-photoshop-pcd
+```
+
+````
+
+**2. Instalasi Dependencies (Library yang dibutuhkan)**
+Pastikan Anda memiliki Python versi 3.9 atau yang lebih baru. Jalankan perintah instalasi berikut:
+
+```bash
+pip install streamlit opencv-python numpy matplotlib pillow ultralytics torch
+
+```
+
+**3. Jalankan Aplikasi**
+Mengingat aplikasi ini memadukan Streamlit dan PyTorch (YOLO), gunakan _flag_ khusus untuk mencegah tabrakan _file watcher_ dan OpenMP:
+
+```bash
+streamlit run new_photoshop.py --server.fileWatcherType=none
+
+```
+
+_Aplikasi akan otomatis terbuka di peramban (browser) bawaan Anda melalui alamat `http://localhost:8501`._
+
+---
+
+## 👥 Pengembang (Kelompok 7)
+
+Proyek ini dikembangkan secara kolaboratif oleh Mahasiswa Program Studi Teknik Informatika, Politeknik Negeri Jakarta:
+
+- **M. Shahid Kustiawan** (NIM: 2407411077)
+
+- **Azim Asshidiq Rama D.** (NIM: 2407411062)
+
+**Dosen Pengampu:** Rizki Elisa Nalawati, S.T., M.T.
+
+---
+
+_Dibuat dengan ❤️ dan ☕ untuk kelulusan mata kuliah Pengolahan Citra Digital._
+
+```
+---
+```
+````
