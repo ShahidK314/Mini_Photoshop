@@ -1,5 +1,6 @@
 import os
-# [PENTING] Mencegah program crash saat menggabungkan YOLO dan Matplotlib
+# [PENTING] Mencegah program crash saat menggabungkan AI dan Matplotlib
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 import sys
@@ -12,12 +13,14 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QSizePolicy, QStatusBar)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap, QFont
-from ultralytics import YOLO
+
+# IMPORT CNN MURNI DARI TENSORFLOW KERAS (PENGGANTI YOLO)
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
 
 class MiniPhotoshopPro(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Mini Photoshop Pro - Pengolahan Citra Digital")
+        self.setWindowTitle("Mini Photoshop Pro - Versi Murni CNN (Keras/TensorFlow)")
         self.setGeometry(50, 50, 1300, 750)
 
         # State Gambar
@@ -27,18 +30,18 @@ class MiniPhotoshopPro(QMainWindow):
         # Terapkan Tema UI Modern (DARK MODE - ADOBE PHOTOSHOP STYLE)
         self.apply_stylesheet()
 
-        # Load Model CNN YOLOv8n
+        # Load Model Murni CNN (MobileNetV2)
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
-        self.statusBar.showMessage("Memuat Model AI YOLOv8...")
+        self.statusBar.showMessage("Memuat Model Arsitektur CNN Murni (TensorFlow/Keras)...")
         self.statusBar.setStyleSheet("background-color: #007acc; color: white; font-weight: bold;")
         
         try:
-            self.yolo_model = YOLO('yolov8n.pt') 
-            self.statusBar.showMessage("Sistem Siap digunakan.", 5000)
+            self.cnn_model = MobileNetV2(weights='imagenet') 
+            self.statusBar.showMessage("Sistem Siap digunakan (Mode Klasifikasi CNN).", 5000)
         except Exception as e:
-            self.yolo_model = None
-            self.statusBar.showMessage(f"Gagal memuat YOLO: {e}")
+            self.cnn_model = None
+            self.statusBar.showMessage(f"Gagal memuat CNN Keras: {e}")
 
         self.initUI()
 
@@ -183,14 +186,14 @@ class MiniPhotoshopPro(QMainWindow):
         lay_color.addWidget(btn_gray); lay_color.addWidget(btn_split); lay_color.addWidget(btn_seg)
         grp_color.setLayout(lay_color); toolbar_layout.addWidget(grp_color)
 
-        # 9 & 11. Analysis & AI
-        grp_ai = QGroupBox("9. Analisis & 11. Cerdas (CNN)")
+        # 9 & 11. Analysis & AI (MURNI CNN)
+        grp_ai = QGroupBox("9. Analisis & 11. Klasifikasi CNN")
         lay_ai = QVBoxLayout()
         btn_show_hist = QPushButton("Analisis Histogram (Before-After)"); btn_show_hist.clicked.connect(self.show_histogram)
-        btn_yolo = QPushButton("Deteksi Objek (CNN YOLOv8)")
-        btn_yolo.setStyleSheet("background-color: #2e7d32; color: white; font-weight: bold; border: none; padding: 10px; border-radius: 5px;")
-        btn_yolo.clicked.connect(self.detect_objects)
-        lay_ai.addWidget(btn_show_hist); lay_ai.addWidget(btn_yolo)
+        btn_cnn = QPushButton("Klasifikasi Objek (Murni CNN Keras)")
+        btn_cnn.setStyleSheet("background-color: #2e7d32; color: white; font-weight: bold; border: none; padding: 10px; border-radius: 5px;")
+        btn_cnn.clicked.connect(self.classify_image_cnn)
+        lay_ai.addWidget(btn_show_hist); lay_ai.addWidget(btn_cnn)
         grp_ai.setLayout(lay_ai); toolbar_layout.addWidget(grp_ai)
 
         scroll_area.setWidget(toolbar_widget)
@@ -227,7 +230,7 @@ class MiniPhotoshopPro(QMainWindow):
 
         main_layout.addLayout(preview_layout, stretch=1)
 
-    # ================= KUMPULAN FUNGSI (LOGIKA SISTEM) =================
+    # ================= KUMPULAN FUNGSI (LOGIKA SISTEM KLASIK) =================
     
     def load_image(self):
         file_filter = "Semua Gambar (*.png *.jpg *.jpeg *.bmp *.webp *.tif);;Semua File (*.*)"
@@ -382,41 +385,49 @@ class MiniPhotoshopPro(QMainWindow):
         plt.show()
         self.statusBar.showMessage("Grafik histogram berhasil ditampilkan.", 3000)
 
-    def detect_objects(self):
+    # ================= LOGIKA MURNI CNN (TENSORFLOW KERAS) =================
+    def classify_image_cnn(self):
         if self.cv_image_current is None: return
-        if self.yolo_model is None:
-            QMessageBox.warning(self, "Error", "Library YOLO tidak tersedia. Cek koneksi internet untuk unduhan pertama.")
+        if self.cnn_model is None:
+            QMessageBox.warning(self, "Error", "Library Keras/TensorFlow tidak tersedia.")
             return
 
-        self.statusBar.showMessage("AI sedang memindai objek pada gambar...")
+        self.statusBar.showMessage("Mengeksekusi Konvolusi Matriks CNN...")
         QApplication.processEvents() 
 
-        kamus_indo = {0: 'Orang', 1: 'Sepeda', 2: 'Mobil', 3: 'Motor', 4: 'Pesawat', 5: 'Bus', 6: 'Kereta', 7: 'Truk', 8: 'Kapal', 14: 'Burung', 15: 'Kucing', 16: 'Anjing', 24: 'Ransel', 26: 'Tas Tangan', 27: 'Dasi', 39: 'Botol', 41: 'Cangkir', 56: 'Kursi', 62: 'TV', 63: 'Laptop', 64: 'Mouse', 66: 'Keyboard', 67: 'HP', 73: 'Buku'}
-
-        img_rgb = cv2.cvtColor(self.cv_image_current, cv2.COLOR_BGR2RGB)
-        results = self.yolo_model(img_rgb)
+        # Pastikan gambar adalah RGB (3 channel) sebelum masuk ke model CNN
+        img_rgb = cv2.cvtColor(self.cv_image_current, cv2.COLOR_BGR2RGB) if len(self.cv_image_current.shape) == 3 else cv2.cvtColor(self.cv_image_current, cv2.COLOR_GRAY2RGB)
         
+        # 1. Resize menjadi matriks standar CNN
+        img_resized = cv2.resize(img_rgb, (224, 224))
+        
+        # 2. Preprocessing & Normalisasi
+        x = np.expand_dims(img_resized, axis=0)
+        x = preprocess_input(x)
+        
+        # 3. Prediksi Klasifikasi
+        preds = self.cnn_model.predict(x)
+        results = decode_predictions(preds, top=3)[0]
+        
+        # 4. Tampilkan hasil probabilitas True Positive
         annotated_frame = self.cv_image_current.copy()
-        jumlah_objek = len(results[0].boxes)
         
-        for box in results[0].boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            class_id = int(box.cls[0])
-            conf = float(box.conf[0])
-            
-            nama_default = results[0].names[class_id]
-            nama_objek = kamus_indo.get(class_id, nama_default.capitalize())
-            label = f"{nama_objek} {conf*100:.0f}%"
-            
-            warna_kotak = (0, 200, 255) # Warna Kuning Keemasan
-            cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), warna_kotak, 2)
-            (w_teks, h_teks), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-            cv2.rectangle(annotated_frame, (x1, max(0, y1 - h_teks - 10)), (x1 + w_teks, max(0, y1)), warna_kotak, -1)
-            cv2.putText(annotated_frame, label, (x1, max(15, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2) # Teks Hitam
+        # Buat kotak gelap agar teks bisa terbaca
+        overlay = annotated_frame.copy()
+        cv2.rectangle(overlay, (5, 5), (420, 130), (20, 20, 20), -1)
+        annotated_frame = cv2.addWeighted(overlay, 0.7, annotated_frame, 0.3, 0)
+        
+        cv2.putText(annotated_frame, "Hasil Klasifikasi Murni CNN:", (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 168, 255), 2)
+        
+        y_offset = 65
+        for i, (imagenet_id, label, prob) in enumerate(results):
+            text = f"{i+1}. {label.capitalize()} (True Pos: {prob*100:.2f}%)"
+            cv2.putText(annotated_frame, text, (15, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            y_offset += 30
             
         self.cv_image_current = annotated_frame
         self.update_previews()
-        self.statusBar.showMessage(f"Pemindaian AI selesai. Ditemukan {jumlah_objek} objek.", 5000)
+        self.statusBar.showMessage("Konvolusi CNN Selesai.", 5000)
 
     # ================= RENDER & UPDATE PREVIEW =================
     def update_previews(self):

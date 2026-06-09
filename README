@@ -1,70 +1,95 @@
 ---
 
 ````markdown
-# 🎨 Mini Photoshop Pro - Web App Edition
+# 🎨 Mini Photoshop Pro - Ultimate Dual-Core Edition
 
-Aplikasi web interaktif untuk pengolahan citra digital dan kecerdasan buatan (AI). Proyek ini dikembangkan menggunakan **Python** dan **Streamlit** sebagai pemenuhan tugas Ujian Akhir Semester (UAS) mata kuliah **Pengolahan Citra Digital** di Politeknik Negeri Jakarta (PNJ)[cite: 3].
+Sebuah mahakarya perangkat lunak pengolahan citra digital interaktif yang dilengkapi dengan arsitektur kecerdasan buatan (_Artificial Intelligence_) ganda. Proyek ini dikembangkan menggunakan **Python** sebagai pemenuhan tugas Ujian Akhir Semester (UAS) mata kuliah **Pengolahan Citra Digital** di Politeknik Negeri Jakarta (PNJ).
 
-Aplikasi ini tidak hanya menyajikan operasi manipulasi piksel matriks dasar, tetapi juga diintegrasikan dengan model _Convolutional Neural Network_ (CNN) YOLOv8 untuk melakukan deteksi objek secara waktu-nyata (_real-time_).
+Repositori ini unik karena menyediakan **DUA** varian antarmuka dan _engine_ sekaligus untuk mendemonstrasikan penguasaan algoritma Computer Vision dan Machine Learning secara komprehensif.
 
 ---
 
-## 🌟 Fitur Utama
+## 🌟 Arsitektur Sistem (Dua Versi Aplikasi)
 
-Proyek ini mencakup 8 kelompok spesifikasi pengolahan citra utama ditambah 1 fitur cerdas berbasis AI:
+### 1. Web App Ultimate Edition (`new_photoshop.py`)
 
-1. **📁 Manajemen File & Kompresi:** Unggah gambar dinamis dan ekspor (_download_) hasil olahan citra dengan simulasi pengaturan kompresi kualitas JPEG.
-2. **✨ Image Enhancement:** Modifikasi kecerahan (_brightness_), kontras, _Histogram Equalization_ untuk perataan cahaya, dan _Sharpening_ konvolusi.
-3. **📐 Transformasi Geometri:** Manipulasi matriks spasial seperti rotasi derajat bebas, _flip_ (vertikal/horizontal), translasi (pergeseran), dan pemotongan (_crop_).
-4. **🩹 Restorasi Citra (Reduksi Noise):** Pelemahan halus citra menggunakan _Gaussian Blur_ dan penghapusan _salt & pepper noise_ menggunakan _Median Filter_.
-5. **💠 Pemrosesan Biner & Tepi:** Konversi citra biner (Thresholding), 6 algoritma deteksi tepi (Canny, Sobel, Prewitt, Robert, Laplacian, LoG), dan operasi Morfologi.
-6. **🎨 Pemrosesan Warna:** Transformasi ruang warna RGB ke Grayscale dan ekstraksi pisah _channel_ (Channel Splitting).
-7. **🧩 Segmentasi Citra:** Klasterisasi warna menggunakan masking _Threshold-based_ (HSV) dan _Region-based_ (K-Means).
-8. **📊 Analisis Histogram:** Visualisasi matriks perbandingan distribusi frekuensi piksel _Before-After_ secara presisi menggunakan Matplotlib.
-9. **🤖 Pengenalan Objek Cerdas (YOLOv8):** Deteksi multi-objek menggunakan arsitektur _Convolutional Neural Network_ (CNN) dengan akurasi _Intersection over Union_ (IoU) tingkat tinggi, dilengkapi penerjemahan kelas COCO ke dalam Bahasa Indonesia.
+Versi paling modern dengan antarmuka UI/UX _Glassmorphism_ kelas Enterprise berbasis **Streamlit**. Memiliki fitur **Dual-Core AI Engine**:
+
+- **Core 1: YOLOv8 (Object Detection)** - Mengekstrak koordinat spasial (_bounding box_) secara dinamis.
+- **Core 2: MobileNetV2 Keras (Image Classification)** - CNN Murni berbasis konvolusi matriks 224x224 untuk probabilitas akurasi _True Positives_.
+- _Catatan: Seluruh hasil output metrik AI (YOLO & Keras) telah dilokalisasi 100% ke dalam Bahasa Indonesia._
+
+### 2. Desktop Classic Edition (`mini_photoshop.py`)
+
+Versi aplikasi desktop konvensional dengan antarmuka _Dark Mode_ (ala Adobe Photoshop) berbasis **PyQt5**.
+
+- Dioptimalkan sebagai demonstrasi implementasi murni algoritma **CNN Klasik (MobileNetV2)** yang sangat stabil dan aman dari _crash_.
+
+---
+
+## ✨ Fitur Pengolahan Citra Utama
+
+Kedua versi aplikasi sama-sama dibekali dengan 8 kelompok spesifikasi komputasi matriks citra berikut:
+
+1. **📁 Manajemen File & Ekspor Resolusi:** Unggah gambar dan ekspor hasil olahan citra dengan pengaturan kompresi kualitas (JPEG).
+2. **💡 Image Enhancement:** Modifikasi kecerahan (_brightness_), kontras, _Histogram Equalization_ untuk perataan cahaya, dan _Sharpening_ (Konvolusi spasial).
+3. **📐 Transformasi Geometri:** Rotasi matriks bebas, _flip_ (vertikal/horizontal), dan penskalaan piksel (_resize_).
+4. **🩹 Reduksi Noise (Restorasi):** Pelemahan halus citra menggunakan _Gaussian Blur_ dan penghapusan _salt & pepper noise_ menggunakan _Median Filter_.
+5. **💠 Pemrosesan Biner & Tepi:** Konversi citra biner (Thresholding) dan algoritma deteksi tepi lengkap (Canny, Sobel, Laplacian, Prewitt, dll).
+6. **🎨 Pemrosesan Warna:** Transformasi ruang warna RGB ke Grayscale dan ekstraksi pisah _channel_ matriks.
+7. **🧩 Segmentasi Citra:** Klasterisasi region warna menggunakan _Threshold-based Masking_ (HSV).
+8. **📊 Analisis Histogram:** Visualisasi grafik perbandingan distribusi frekuensi piksel _Before-After_ secara dinamis menggunakan Matplotlib.
 
 ---
 
 ## 💻 Tech Stack (Teknologi yang Digunakan)
 
-- **Frontend (GUI):** [Streamlit](https://streamlit.io/)
+- **Frontend (GUI):** Streamlit (Web) & PyQt5 (Desktop)
 - **Computer Vision (Backend):** OpenCV (`cv2`), Pillow (PIL)
 - **Scientific Computing & Matrix:** NumPy
 - **Data Visualization:** Matplotlib
-- **Machine Learning / CNN:** Ultralytics (YOLOv8), PyTorch
+- **Machine Learning / CNN Engine:** \* Ultralytics YOLOv8 (PyTorch)
+  - TensorFlow / Keras (MobileNetV2)
 
 ---
 
-## 🚀 Cara Instalasi dan Menjalankan Secara Lokal
+## 🚀 Cara Instalasi dan Menjalankan
 
-Ikuti langkah-langkah berikut untuk menjalankan aplikasi ini di komputer Anda:
+Ikuti langkah-langkah berikut untuk menguji aplikasi di komputer Anda:
 
 **1. Clone Repositori**
 
 ```bash
-git clone [https://github.com/USERNAME_GITHUB_ANDA/mini-photoshop-pcd.git](https://github.com/USERNAME_GITHUB_ANDA/mini-photoshop-pcd.git)
-cd mini-photoshop-pcd
+git clone [https://github.com/ShahidK314/Mini_Photoshop.git](https://github.com/ShahidK314/Mini_Photoshop.git)
+cd Mini_Photoshop
 ```
 
 ````
 
-**2. Instalasi Dependencies (Library yang dibutuhkan)**
-Pastikan Anda memiliki Python versi 3.9 atau yang lebih baru. Jalankan perintah instalasi berikut:
+_(Ubah `USERNAME_GITHUB_ANDA` dengan username asli Anda)._
+
+**2. Instalasi Dependencies**
+Pastikan Anda memiliki Python versi 3.9+. Jalankan perintah ini:
 
 ```bash
-pip install streamlit opencv-python numpy matplotlib pillow ultralytics torch
+pip install streamlit opencv-python numpy matplotlib pillow ultralytics torch tensorflow PyQt5
 
 ```
 
-**3. Jalankan Aplikasi**
-Mengingat aplikasi ini memadukan Streamlit dan PyTorch (YOLO), gunakan _flag_ khusus untuk mencegah tabrakan _file watcher_ dan OpenMP:
+**3. Jalankan Aplikasi Web Ultimate (Streamlit)**
+Gunakan perintah khusus ini untuk mencegah tabrakan _file watcher_ dengan _engine_ TensorFlow/YOLO:
 
 ```bash
 streamlit run new_photoshop.py --server.fileWatcherType=none
 
 ```
 
-_Aplikasi akan otomatis terbuka di peramban (browser) bawaan Anda melalui alamat `http://localhost:8501`._
+**4. Jalankan Aplikasi Desktop Klasik (PyQt5)**
+
+```bash
+python mini_photoshop.py
+
+```
 
 ---
 
@@ -73,16 +98,14 @@ _Aplikasi akan otomatis terbuka di peramban (browser) bawaan Anda melalui alamat
 Proyek ini dikembangkan secara kolaboratif oleh Mahasiswa Program Studi Teknik Informatika, Politeknik Negeri Jakarta:
 
 - **M. Shahid Kustiawan** (NIM: 2407411077)
-
 - **Azim Asshidiq Rama D.** (NIM: 2407411062)
 
 **Dosen Pengampu:** Rizki Elisa Nalawati, S.T., M.T.
 
 ---
 
-_Dibuat dengan ❤️ dan ☕ untuk kelulusan mata kuliah Pengolahan Citra Digital._
+_Dibuat dengan ❤️, presisi matriks, dan arsitektur CNN untuk evaluasi Ujian Akhir Semester._
 
-```
----
-```
 ````
+
+---
