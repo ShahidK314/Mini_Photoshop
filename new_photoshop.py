@@ -1,5 +1,6 @@
 import os
-# Mencegah log error dari TensorFlow dan konflik OpenMP
+# [PENTING] Mencegah log error dari TensorFlow dan mencegah aplikasi crash
+# akibat konflik thread OpenMP saat Matplotlib dan AI dijalankan bersamaan
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -11,80 +12,37 @@ import matplotlib.pyplot as plt
 import io
 import time
 
-# Import Model AI
+# Import Model Deep Learning
 from ultralytics import YOLO
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
 
 # ================= 1. KONFIGURASI HALAMAN & TEMA UTAMA =================
 st.set_page_config(page_title="Mini Photoshop Pro | Ultimate", page_icon="💎", layout="wide", initial_sidebar_state="expanded")
 
-# CSS Injection Level Enterprise (Glassmorphism, Animasi, Custom Scrollbar)
+# CSS Injection Level Enterprise: Menggunakan efek Glassmorphism dan font korporat
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Custom Scrollbar */
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #0e1117; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-    /* Header Glassmorphism Premium */
-    .hero-container {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 2.5rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-container::before {
-        content: "";
-        position: absolute;
-        top: -50%; left: -50%; width: 200%; height: 200%;
-        background: radial-gradient(circle, rgba(0,168,255,0.1) 0%, transparent 60%);
-        animation: rotate 20s linear infinite;
-        z-index: 0;
-    }
+    .hero-container { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 2.5rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; overflow: hidden; }
+    .hero-container::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,168,255,0.1) 0%, transparent 60%); animation: rotate 20s linear infinite; z-index: 0; }
     @keyframes rotate { 100% { transform: rotate(360deg); } }
-    
     .hero-content { position: relative; z-index: 1; }
     .hero-title { background: -webkit-linear-gradient(45deg, #00a8ff, #00fcce); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 3rem; margin: 0; letter-spacing: -1px; }
     .hero-subtitle { color: #94a3b8; font-size: 1.1rem; margin-top: 0.5rem; font-weight: 400; }
-
-    /* Styling Tombol Modern */
-    div.stButton > button {
-        background: #1e293b;
-        color: #e2e8f0;
-        border: 1px solid #334155;
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    div.stButton > button:hover {
-        background: #00a8ff;
-        border-color: #00a8ff;
-        color: #ffffff;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 168, 255, 0.3);
-    }
-    
-    /* Label Metrics yang lebih elegan */
+    div.stButton > button { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 8px; padding: 0.6rem 1rem; font-weight: 600; transition: all 0.3s ease; width: 100%; }
+    div.stButton > button:hover { background: #00a8ff; border-color: #00a8ff; color: #ffffff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 168, 255, 0.3); }
     [data-testid="stMetricValue"] { font-size: 1.8rem; font-weight: 800; color: #00fcce; }
 </style>
 """, unsafe_allow_html=True)
 
-# ================= 2. CACHING AI MODELS (Performa Super Cepat) =================
+# ================= 2. CACHING AI MODELS =================
+# Menggunakan @st.cache_resource agar model AI dengan bobot ber-megabyte
+# hanya dimuat SATU KALI saja ke RAM, mencegah lag saat memencet tombol
 @st.cache_resource(show_spinner=False)
 def load_models():
     yolo = YOLO('yolov8n.pt')
@@ -95,6 +53,7 @@ with st.spinner("Menginisialisasi Engine Deep Learning..."):
     yolo_model, cnn_model = load_models()
 
 # ================= 3. SESSION STATE MANAGEMENT =================
+# Mengunci state gambar agar matriks tidak terhapus saat web di-refresh
 if 'img_original' not in st.session_state: st.session_state.img_original = None
 if 'img_current' not in st.session_state: st.session_state.img_current = None
 if 'cnn_result' not in st.session_state: st.session_state.cnn_result = None
@@ -105,46 +64,22 @@ def reset_image():
         st.session_state.cnn_result = None
         st.toast('🔄 Gambar dikembalikan ke kondisi asali.', icon='♻️')
 
-# ================= KAMUS PENERJEMAH AI KE BAHASA INDONESIA =================
-# Kamus YOLOv8 (80 Kelas COCO Dataset)
+# ================= KAMUS PENERJEMAH AI =================
+# Menerjemahkan index class bawaan (bahasa Inggris) ke Bahasa Indonesia
 KAMUS_YOLO = {
     0: 'Orang', 1: 'Sepeda', 2: 'Mobil', 3: 'Motor', 4: 'Pesawat', 5: 'Bus', 6: 'Kereta', 7: 'Truk', 8: 'Kapal', 
-    9: 'Lampu Lalu Lintas', 10: 'Hidran Api', 11: 'Rambu Stop', 12: 'Meteran Parkir', 13: 'Bangku Taman', 14: 'Burung', 
-    15: 'Kucing', 16: 'Anjing', 17: 'Kuda', 18: 'Domba', 19: 'Sapi', 20: 'Gajah', 21: 'Beruang', 22: 'Zebra', 
-    23: 'Jerapah', 24: 'Ransel', 25: 'Payung', 26: 'Tas Tangan', 27: 'Dasi', 28: 'Koper', 29: 'Frisbee', 30: 'Ski', 
-    31: 'Papan Salju', 32: 'Bola Olahraga', 33: 'Layang-layang', 34: 'Tongkat Bisbol', 35: 'Sarung Tangan Bisbol', 
-    36: 'Skateboard', 37: 'Papan Selancar', 38: 'Raket Tenis', 39: 'Botol', 40: 'Gelas Anggur', 41: 'Cangkir', 
-    42: 'Garpu', 43: 'Pisau', 44: 'Sendok', 45: 'Mangkuk', 46: 'Pisang', 47: 'Apel', 48: 'Sandwich', 49: 'Jeruk', 
-    50: 'Brokoli', 51: 'Wortel', 52: 'Hot Dog', 53: 'Pizza', 54: 'Donat', 55: 'Kue', 56: 'Kursi', 57: 'Sofa', 
-    58: 'Tanaman Pot', 59: 'Tempat Tidur', 60: 'Meja Makan', 61: 'Toilet', 62: 'Monitor / TV', 63: 'Laptop', 
-    64: 'Mouse Komputer', 65: 'Remote', 66: 'Keyboard', 67: 'Ponsel', 68: 'Microwave', 69: 'Oven', 70: 'Pemanggang Roti', 
-    71: 'Wastafel', 72: 'Kulkas', 73: 'Buku', 74: 'Jam', 75: 'Vas', 76: 'Gunting', 77: 'Boneka Beruang', 
-    78: 'Pengering Rambut', 79: 'Sikat Gigi'
+    14: 'Burung', 15: 'Kucing', 16: 'Anjing', 17: 'Kuda', 18: 'Domba', 19: 'Sapi', 20: 'Gajah', 24: 'Ransel', 
+    25: 'Payung', 26: 'Tas Tangan', 27: 'Dasi', 39: 'Botol', 41: 'Cangkir', 56: 'Kursi', 62: 'Monitor / TV', 
+    63: 'Laptop', 64: 'Mouse Komputer', 66: 'Keyboard', 67: 'Ponsel', 73: 'Buku'
 }
 
-# Fungsi Penerjemah Keras (ImageNet Dataset 1000 Kelas)
 def terjemahkan_imagenet(label_inggris):
     kamus_keras = {
-        'suit': 'Setelan Jas Formal',
-        'windsor_tie': 'Dasi Windsor',
-        'loafer': 'Sepatu Pantofel',
-        'bow_tie': 'Dasi Kupu-kupu',
-        'military_uniform': 'Seragam Militer',
-        'laptop': 'Laptop',
-        'cellular_telephone': 'Ponsel Pintar / HP',
-        'desktop_computer': 'Komputer Desktop',
-        'mouse': 'Mouse Komputer',
-        'keyboard': 'Keyboard',
-        'coffee_mug': 'Cangkir Kopi',
-        'sports_car': 'Mobil Sport',
-        'passenger_car': 'Mobil Penumpang',
-        'minivan': 'Mobil Minivan',
-        'tabby': 'Kucing Tabby',
-        'golden_retriever': 'Anjing Golden Retriever',
-        'sunglasses': 'Kacamata Hitam',
-        'backpack': 'Tas Ransel'
+        'suit': 'Setelan Jas Formal', 'windsor_tie': 'Dasi Windsor', 'loafer': 'Sepatu Pantofel', 
+        'bow_tie': 'Dasi Kupu-kupu', 'laptop': 'Laptop', 'cellular_telephone': 'Ponsel Pintar / HP', 
+        'mouse': 'Mouse Komputer', 'keyboard': 'Keyboard', 'coffee_mug': 'Cangkir Kopi', 
+        'sports_car': 'Mobil Sport', 'passenger_car': 'Mobil Penumpang', 'backpack': 'Tas Ransel'
     }
-    # Jika ada di kamus, gunakan terjemahan. Jika tidak, bersihkan teks Inggrisnya.
     label_bersih = label_inggris.lower().strip()
     return kamus_keras.get(label_bersih, label_bersih.replace('_', ' ').title())
 
@@ -161,12 +96,14 @@ st.markdown("""
 # ================= 5. SIDEBAR: PROFESSIONAL TOOLS PANEL =================
 st.sidebar.markdown("<h2 style='color:#00a8ff; font-weight:800; text-align:center;'>🛠️ WORKSPACE TOOLS</h2><hr style='border-color:#334155;'>", unsafe_allow_html=True)
 
+# --- 1. MANAJEMEN FILE & KOMPRESI ---
 with st.sidebar.expander("📁 1. Manajemen & Ekspor Resolusi", expanded=True):
     uploaded_file = st.file_uploader("Drop file citra di sini", type=['png', 'jpg', 'jpeg', 'bmp', 'webp', 'tif'], label_visibility="collapsed")
     if uploaded_file is not None:
+        # Konversi file byte menjadi matriks gambar yang bisa dibaca OpenCV
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        img_bgr = cv2.imdecode(file_bytes, 1)
-        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        img_bgr = cv2.imdecode(file_bytes, 1) # Baca sebagai BGR
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB) # Ubah ke standar RGB untuk web
         
         if st.session_state.img_original is None or st.session_state.get('last_file') != uploaded_file.name:
             st.session_state.img_original = img_rgb.copy()
@@ -179,82 +116,120 @@ with st.sidebar.expander("📁 1. Manajemen & Ekspor Resolusi", expanded=True):
         col_res1, col_res2 = st.columns(2)
         col_res1.button("🔄 Reset", on_click=reset_image, use_container_width=True)
         
+        # LOGIKA KOMPRESI: Menurunkan kualitas lossy JPEG sesuai persentase slider
         quality_val = st.slider("Kualitas Kompresi JPEG (%)", 10, 100, 85)
         img_bgr_save = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2BGR)
         _, buffer = cv2.imencode(".jpg", img_bgr_save, [int(cv2.IMWRITE_JPEG_QUALITY), quality_val])
         st.download_button("💾 Ekspor Citra", io.BytesIO(buffer), "ps_output_hq.jpg", "image/jpeg", use_container_width=True)
 
-# Proteksi UI jika belum ada gambar
 if st.session_state.img_current is None:
     st.info("💡 Sistem standby. Silakan unggah citra pada panel *Workspace Tools* di sebelah kiri untuk memulai komputasi matriks.")
     st.stop()
 
+# --- 2. IMAGE ENHANCEMENT ---
 with st.sidebar.expander("✨ 2. Enhancement & Koreksi Warna"):
+    # LOGIKA BRIGHTNESS/CONTRAST: Memanipulasi fungsi y = alpha * x + beta (Contrast = alpha, Brightness = beta)
     cb_bright = st.slider("Kecerahan (Brightness)", -100, 100, 0)
     cb_contrast = st.slider("Kontras (Contrast)", 1.0, 3.0, 1.0, 0.1)
     if st.button("Terapkan Koreksi", use_container_width=True):
         st.session_state.img_current = cv2.convertScaleAbs(st.session_state.img_current, alpha=cb_contrast, beta=cb_bright)
-        st.session_state.cnn_result = None
-        st.toast("Koreksi cahaya & kontras diterapkan", icon="✨")
-        st.rerun()
+        st.session_state.cnn_result = None; st.rerun()
         
     col_enh1, col_enh2 = st.columns(2)
+    # LOGIKA HISTOGRAM EQ: Meratakan distribusi kontras. Harus di YUV (Luminance) agar warna asli tidak rusak
     if col_enh1.button("Hist. Eq", use_container_width=True):
         yuv = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2YUV)
         yuv[:,:,0] = cv2.equalizeHist(yuv[:,:,0])
         st.session_state.img_current = cv2.cvtColor(yuv, cv2.COLOR_YUV2RGB)
         st.session_state.cnn_result = None; st.rerun()
         
+    # LOGIKA SHARPENING: Konvolusi Spasial menggunakan kernel matriks 3x3 untuk menebalkan detail
     if col_enh2.button("Sharpen", use_container_width=True):
         st.session_state.img_current = cv2.filter2D(st.session_state.img_current, -1, np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]]))
         st.session_state.cnn_result = None; st.rerun()
 
+# --- 3. TRANSFORMASI SPASIAL (GEOMETRI) ---
 with st.sidebar.expander("📐 3. Transformasi Spasial"):
     geom_action = st.selectbox("Operasi Matriks:", ["Rotasi Spasial", "Mirroring", "Penskalaan (Resize 50%)"])
     if geom_action == "Rotasi Spasial":
         deg = st.slider("Derajat", 0, 360, 0)
+        # Menggunakan matriks Affine (Transformasi Rotasi berdasar titik tengah matriks citra)
         if st.button("Putar Matriks", use_container_width=True):
             h, w = st.session_state.img_current.shape[:2]
             st.session_state.img_current = cv2.warpAffine(st.session_state.img_current, cv2.getRotationMatrix2D((w//2, h//2), deg, 1.0), (w, h))
             st.session_state.cnn_result = None; st.rerun()
     elif geom_action == "Mirroring":
+        # Kode 1 = Flip X (Horizontal), Kode 0 = Flip Y (Vertical)
         c_m1, c_m2 = st.columns(2)
         if c_m1.button("Flip H"): st.session_state.img_current = cv2.flip(st.session_state.img_current, 1); st.session_state.cnn_result = None; st.rerun()
         if c_m2.button("Flip V"): st.session_state.img_current = cv2.flip(st.session_state.img_current, 0); st.session_state.cnn_result = None; st.rerun()
     elif geom_action == "Penskalaan (Resize 50%)" and st.button("Eksekusi Skala"):
+        # Mereduksi skala dimensi matriks menjadi setengah (Interpolasi Linear)
         h, w = st.session_state.img_current.shape[:2]
         st.session_state.img_current = cv2.resize(st.session_state.img_current, (w//2, h//2))
         st.session_state.cnn_result = None; st.rerun()
 
+# --- 4. REDUKSI NOISE (RESTORASI) ---
 with st.sidebar.expander("🩹 4. Filter Reduksi Noise"):
     c_n1, c_n2 = st.columns(2)
+    # GAUSSIAN BLUR: Meratakan piksel dengan kurva distribusi normal (Smooth)
     if c_n1.button("Gaussian", use_container_width=True):
         st.session_state.img_current = cv2.GaussianBlur(st.session_state.img_current, (11, 11), 0); st.session_state.cnn_result = None; st.rerun()
+    # MEDIAN FILTER: Sangat efektif mengeliminasi noise "Salt and Pepper" (Bintik Hitam-Putih)
     if c_n2.button("Median", use_container_width=True):
         st.session_state.img_current = cv2.medianBlur(st.session_state.img_current, 5); st.session_state.cnn_result = None; st.rerun()
 
-with st.sidebar.expander("💠 5 & 6. Biner, Tepi & Splitting"):
+# --- 5 & 6. BINER, TEPI, MORFOLOGI & WARNA ---
+with st.sidebar.expander("💠 5 & 6. Biner, Tepi, Morfologi & Warna"):
+    st.markdown("**Pemrosesan Tepi & Morfologi**")
+    
+    # 6 ALGORITMA TEPI UTAMA: Deteksi berbasis gradient matriks vertikal & horizontal
+    metode_tepi = st.selectbox("Algoritma Tepi (Lengkap):", ["Canny", "Sobel", "Prewitt", "Robert", "Laplacian", "LoG"])
+    if st.button("Jalankan Deteksi Tepi", use_container_width=True):
+        g = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2GRAY) if len(st.session_state.img_current.shape) == 3 else st.session_state.img_current
+        edges = g.copy()
+        
+        if metode_tepi == "Canny": edges = cv2.Canny(g, 100, 200) # Algoritma paling bersih & canggih
+        elif metode_tepi == "Sobel": edges = cv2.convertScaleAbs(cv2.magnitude(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=3), cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=3)))
+        elif metode_tepi == "Prewitt": edges = cv2.convertScaleAbs(cv2.filter2D(g, -1, np.array([[-1,0,1],[-1,0,1],[-1,0,1]])) + cv2.filter2D(g, -1, np.array([[1,1,1],[0,0,0],[-1,-1,-1]])))
+        elif metode_tepi == "Robert": edges = cv2.convertScaleAbs(cv2.filter2D(g, -1, np.array([[1,0],[0,-1]])) + cv2.filter2D(g, -1, np.array([[0,1],[-1,0]])))
+        elif metode_tepi == "Laplacian": edges = cv2.convertScaleAbs(cv2.Laplacian(g, cv2.CV_64F)) # Turunan kedua (Deteksi segala arah)
+        elif metode_tepi == "LoG": edges = cv2.convertScaleAbs(cv2.Laplacian(cv2.GaussianBlur(g, (3,3), 0), cv2.CV_64F)) # Laplacian dihaluskan dulu
+        
+        st.session_state.img_current = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB); st.session_state.cnn_result = None; st.rerun()
+
+    # OPERASI MORFOLOGI: Erosi (mengikis objek putih), Dilasi (menebalkan objek putih) menggunakan matriks Kernel 5x5
+    c_m1, c_m2 = st.columns(2)
+    if c_m1.button("Erosi", use_container_width=True):
+        st.session_state.img_current = cv2.erode(st.session_state.img_current, np.ones((5,5), np.uint8), iterations=1); st.session_state.cnn_result = None; st.rerun()
+    if c_m2.button("Dilasi", use_container_width=True):
+        st.session_state.img_current = cv2.dilate(st.session_state.img_current, np.ones((5,5), np.uint8), iterations=1); st.session_state.cnn_result = None; st.rerun()
+
+    st.markdown("**Segmentasi & Warna**")
     c_b1, c_b2 = st.columns(2)
+    
+    # THRESHOLDING: Piksel di bawah 127 jadi Hitam (0), di atasnya jadi Putih (255)
     if c_b1.button("Biner", use_container_width=True):
         g = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2GRAY) if len(st.session_state.img_current.shape) == 3 else st.session_state.img_current
         _, b = cv2.threshold(g, 127, 255, cv2.THRESH_BINARY)
         st.session_state.img_current = cv2.cvtColor(b, cv2.COLOR_GRAY2RGB); st.session_state.cnn_result = None; st.rerun()
+        
+    # CHANNEL SPLITTING: Memisahkan Red, Green, Blue, lalu mematikan Green dan Blue
     if c_b2.button("Split Merah", use_container_width=True) and len(st.session_state.img_current.shape) == 3:
         r, g, b = cv2.split(st.session_state.img_current)
         st.session_state.img_current = cv2.merge([r, np.zeros_like(r), np.zeros_like(r)]); st.session_state.cnn_result = None; st.rerun()
         
-    metode_tepi = st.selectbox("Algoritma Tepi:", ["Canny", "Sobel", "Laplacian"])
-    if st.button("Deteksi Tepi", use_container_width=True):
-        g = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2GRAY) if len(st.session_state.img_current.shape) == 3 else st.session_state.img_current
-        if metode_tepi == "Canny": edges = cv2.Canny(g, 100, 200)
-        elif metode_tepi == "Sobel": edges = cv2.convertScaleAbs(cv2.magnitude(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=3), cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=3)))
-        elif metode_tepi == "Laplacian": edges = cv2.convertScaleAbs(cv2.Laplacian(g, cv2.CV_64F))
-        st.session_state.img_current = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB); st.session_state.cnn_result = None; st.rerun()
+    # SEGMENTASI WARNA HSV: Membuat mask dengan rentang batas warna Hue Saturation Value (Fokus area terang)
+    if st.button("Masking Threshold (HSV)", use_container_width=True):
+        hsv = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2HSV)
+        mask = cv2.inRange(hsv, np.array([0, 50, 50]), np.array([180, 255, 255]))
+        st.session_state.img_current = cv2.bitwise_and(st.session_state.img_current, st.session_state.img_current, mask=mask)
+        st.session_state.cnn_result = None; st.rerun()
 
 # ================= 6. MAIN AREA: TABS DASHBOARD =================
 tab_visual, tab_hist, tab_ai = st.tabs(["👁️ Visual Workspace", "📊 Analisis Histogram", "🧠 Dual-Core AI Engine"])
 
-# --- TAB 1: VISUAL WORKSPACE ---
+# --- TAB 1: VISUAL WORKSPACE (TAMPILAN GAMBAR) ---
 with tab_visual:
     col_img1, col_img2 = st.columns(2)
     with col_img1:
@@ -267,11 +242,12 @@ with tab_visual:
         st.image(st.session_state.img_current, use_container_width=True)
         st.caption(f"📏 Resolusi Matriks Terkini: {st.session_state.img_current.shape[1]} x {st.session_state.img_current.shape[0]} px")
 
-# --- TAB 2: HISTOGRAM ANALYSIS ---
+# --- TAB 2: HISTOGRAM (STATISTIK DISTRIBUSI PIKSEL) ---
 with tab_hist:
     st.markdown("<h3 style='color:#00a8ff;'>Analisis Distribusi Frekuensi Piksel (Grayscale)</h3>", unsafe_allow_html=True)
     if st.button("📉 Render Plot Matplotlib Real-Time"):
         with st.spinner("Mengomputasi array piksel..."):
+            # Ubah ke array skala abu-abu (0-255) agar lebih mudah dianalisis statistiknya
             g_ori = cv2.cvtColor(st.session_state.img_original, cv2.COLOR_RGB2GRAY) if len(st.session_state.img_original.shape)==3 else st.session_state.img_original
             g_cur = cv2.cvtColor(st.session_state.img_current, cv2.COLOR_RGB2GRAY) if len(st.session_state.img_current.shape)==3 else st.session_state.img_current
             
@@ -279,6 +255,7 @@ with tab_hist:
             fig, ax = plt.subplots(1, 2, figsize=(15, 5))
             fig.patch.set_facecolor('#0e1117')
             
+            # Meratakan matriks piksel (.ravel()) untuk dicari frekuensinya di sumbu X (0 hingga 255)
             ax[0].set_facecolor('#1e293b'); ax[0].grid(color='#334155', linestyle='--', alpha=0.5)
             ax[0].hist(g_ori.ravel(), bins=256, range=[0,256], color='#94a3b8', alpha=0.8)
             ax[0].set_title('Distribusi Orisinal', color='#f8fafc', pad=15)
@@ -289,13 +266,12 @@ with tab_hist:
             
             st.pyplot(fig)
 
-# --- TAB 3: DUAL-CORE AI ENGINE ---
+# --- TAB 3: INFRASTRUKTUR DEEP LEARNING (NILAI TAMBAH UAS) ---
 with tab_ai:
     st.markdown("<h3 style='color:#00a8ff; margin-bottom: 20px;'>Infrastruktur Deep Learning</h3>", unsafe_allow_html=True)
-    
     col_ai1, col_ai2 = st.columns(2)
     
-    # KORE CORE 1: YOLOv8
+    # AI 1: YOLOv8 - ARSITEKTUR OBJECT DETECTION (Deteksi Kotak Bounding Box)
     with col_ai1:
         with st.container(border=True):
             st.markdown("#### 🎯 Core 1: YOLOv8 Object Detection")
@@ -303,17 +279,23 @@ with tab_ai:
             if st.button("🚀 Run YOLOv8 Engine", use_container_width=True):
                 with st.spinner('Menjalankan feed-forward network YOLO...'):
                     img_detect = st.session_state.img_current.copy()
+                    
+                    # Lempar gambar ke jaringan model YOLOv8
                     results = yolo_model(img_detect)
                     
+                    # Lakukan ekstraksi array prediksi YOLO
                     for box in results[0].boxes:
+                        # 1. Parsing Titik Koordinat (X, Y)
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
+                        # 2. Parsing ID Label dan Akurasinya
                         id_cls, conf = int(box.cls[0]), float(box.conf[0])
                         
-                        # Penerjemahan ke Bahasa Indonesia menggunakan KAMUS_YOLO
+                        # 3. Translasikan label bahasa Inggris COCO ke Bahasa Indonesia
                         nama_asli = results[0].names[id_cls]
                         label_indo = KAMUS_YOLO.get(id_cls, nama_asli.capitalize())
                         label = f"{label_indo} {conf*100:.0f}%"
                         
+                        # 4. Gambarkan Bounding Box di atas matriks citra menggunakan OpenCV
                         cv2.rectangle(img_detect, (x1, y1), (x2, y2), (0, 252, 206), 3)
                         (w_t, h_t), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
                         cv2.rectangle(img_detect, (x1, max(0, y1 - h_t - 15)), (x1 + w_t, max(0, y1)), (0, 252, 206), -1)
@@ -324,20 +306,26 @@ with tab_ai:
                     time.sleep(0.5)
                     st.rerun()
 
-    # KORE CORE 2: CNN KERAS
+    # AI 2: CNN KERAS - ARSITEKTUR IMAGE CLASSIFICATION MURNI (Prediksi Global)
     with col_ai2:
         with st.container(border=True):
             st.markdown("#### 🧠 Core 2: MobileNetV2 CNN Keras")
             st.write("Mengekstrak fitur matriks konvolusi murni `224x224` untuk probabilitas akurasi (*True Positives*).")
             if st.button("🧪 Run MobileNetV2 CNN", use_container_width=True):
                 with st.spinner('Memproses Layer Konvolusi dan Softmax...'):
+                    # 1. Resize Wajib ke 224x224 (Syarat mutlak MobileNetV2)
                     img_resized = cv2.resize(st.session_state.img_current.copy(), (224, 224))
+                    # 2. Preprocessing Keras (Expand dimensi matrix untuk Batching)
                     x = preprocess_input(np.expand_dims(img_resized, axis=0))
+                    
+                    # 3. Eksekusi Forward Propagation di Keras
                     preds = cnn_model.predict(x)
+                    
+                    # 4. Decode 3 probabilitas (Softmax) tertinggi
                     st.session_state.cnn_result = decode_predictions(preds, top=3)[0]
                     st.toast("Konvolusi CNN berhasil dikomputasi!", icon="🧠")
 
-    # TAMPILAN HASIL CNN KERAS (Dengan Bahasa Indonesia)
+    # MENCETAK HASIL METRIK PROBABILITAS (HANYA UNTUK CNN KERAS)
     if st.session_state.cnn_result is not None:
         st.markdown("---")
         st.markdown("<h4 style='color:#00fcce;'>📈 Hasil Klasifikasi True Positives (Top 3):</h4>", unsafe_allow_html=True)
@@ -345,6 +333,6 @@ with tab_ai:
         cols_m = [m1, m2, m3]
         for i, (_, label_inggris, prob) in enumerate(st.session_state.cnn_result):
             with cols_m[i]:
-                # Menerjemahkan menggunakan fungsi Keras
+                # Menerjemahkan output probabilitas ImageNet menggunakan fungsi
                 label_indo = terjemahkan_imagenet(label_inggris)
                 st.metric(label=f"Peringkat #{i+1}", value=label_indo, delta=f"{prob*100:.2f}% Akurasi", delta_color="normal")
